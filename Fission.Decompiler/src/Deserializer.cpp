@@ -76,7 +76,7 @@ std::optional<DeserializedBytecode> Deserializer::Deserialize(const std::string 
         DeserializedFunction function{};
         function.uTypeVersion = result.typesVersion;
         function.uBytecodeVersion = result.bytecodeVersion;
-        function.bytecodeId = int(i);
+        function.bytecodeId = static_cast<uint8_t>(i);
         function.maxstacksize = reader.Read<uint8_t>();
         function.numparams = reader.Read<uint8_t>();
         function.nups = reader.Read<uint8_t>();

@@ -22,11 +22,14 @@ set(ENABLE_UBSAN OFF)
 
 
 # be lenient in C for pointer types and fn decls, deps may fail to compile else.
-add_compile_options($<$<COMPILE_LANGUAGE:C>:-Wno-error=incompatible-pointer-types>)
-add_compile_options($<$<COMPILE_LANGUAGE:C>:-Wno-implicit-function-declaration>)
-add_compile_options($<$<COMPILE_LANGUAGE:C>:-Wno-deprecated-declarations>)
-add_compile_options($<$<COMPILE_LANGUAGE:C>:-Wno-unused-parameter>)
-add_compile_options($<$<COMPILE_LANGUAGE:C>:-Wno-c2y-extensions>)
+# These are GCC/Clang-only flags; MSVC does not recognise them and errors on D8021.
+if (NOT CMAKE_CXX_COMPILER_FRONTEND_VARIANT STREQUAL "MSVC")
+    add_compile_options($<$<COMPILE_LANGUAGE:C>:-Wno-error=incompatible-pointer-types>)
+    add_compile_options($<$<COMPILE_LANGUAGE:C>:-Wno-implicit-function-declaration>)
+    add_compile_options($<$<COMPILE_LANGUAGE:C>:-Wno-deprecated-declarations>)
+    add_compile_options($<$<COMPILE_LANGUAGE:C>:-Wno-unused-parameter>)
+    add_compile_options($<$<COMPILE_LANGUAGE:C>:-Wno-c2y-extensions>)
+endif ()
 
 
 if (CMAKE_CXX_COMPILER_FRONTEND_VARIANT STREQUAL "GNU")
