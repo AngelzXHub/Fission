@@ -1,0 +1,76 @@
+name: Build and Release (Windows)
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Release tag (e.g. v1.0.0)"
+        required: false
+        default: ""
+
+jobs:
+  build-windows:
+    name: Build Windows Executable
+    runs-on: windows-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up CMake
+        uses: jwlawson/actions-setup-cmake@v2
+        with:
+          cmake-version: "3.31.x"
+
+      - name: Configure CMake
+        run: |
+          cmake -B build -G "Visual Studio 17 2022" -A x64 `
+            -DCMAKE_BUILD_TYPE=Release `
+            -DPRODUCTION_BUILD=ON `
+            -DDEBUG_INFORMATION_EXTENSIVE=OFF `
+            -DDEBUG_NO_INLINING=OFF `
+            -DUSE_CCACHE=OFF `
+            -DBUILD_TESTING=OFF
+
+      - name: Build
+        run: cmake --build build --config Release --parallel
+
+      - name: Collect artifact
+        run: |
+          New-Item -ItemType Directory -Force -Path dist
+          Copy-Item "build\Release\Fission.CLI.exe" "dist\Fission.CLI.exe"
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Fission.CLI-windows-x64
+          path: dist\Fission.CLI.exe
+
+      - name: Determine release tag
+        id: tag
+        shell: bash
+        run: |
+          if [ "${{ github.event_name }}" = "push" ]; then
+            echo "value=${GITHUB_REF#refs/tags/}" >> "$GITHUB_OUTPUT"
+          else
+            echo "value=${{ github.event.inputs.tag }}" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Create GitHub Release
+        if: github.event_name == 'push' || github.event.inputs.tag != ''
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.tag.outputs.value }}
+          name: Fission ${{ steps.tag.outputs.value }}
+          draft: false
+          prerelease: false
+          files: dist\Fission.CLI.exe
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
