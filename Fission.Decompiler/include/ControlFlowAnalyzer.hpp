@@ -102,7 +102,7 @@ struct SSARef {
 
     bool operator==(const SSARef &other) const { return regIndex == other.regIndex && version == other.version; }
     SSARef() = default;
-    SSARef(int32_t reg, int32_t ver) : regIndex(reg), version(ver) {}
+    SSARef(int32_t reg, int32_t ver) : regIndex(static_cast<uint8_t>(reg)), version(ver) {}
 };
 
 namespace std {

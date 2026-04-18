@@ -735,7 +735,7 @@ LiftedFunction BytecodeLifter::LiftFunctionBytecodeInternal(const DeserializedFu
             instr.operands[1].type = LiftedOperandType::ImmediateInteger;
             instr.operands[1].value.imm.n = instruction.GetD();
             instr.operands[2].type = LiftedOperandType::Register;
-            instr.operands[2].value.reg = function->instructions.at(currentIndex + 1).instruction;
+            instr.operands[2].value.reg = function->instructions.at(currentIndex + 1).GetABCOperand(LuauInstruction::LuauOperand::A);
             liftedFunction.instructions.emplace_back(LiftedOperation::NOP).instructionRemarks =
                 "INFO: padding due to the original instruction requiring an auxiliary.";
             break;
